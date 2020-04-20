@@ -1,9 +1,10 @@
 # Necessary Packages for Django Based API Format
+from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from pastebin_snippets.models import Snippet
-from pastebin_snippets.serializers import SnippetSerializers
+from pastebin_snippets.serializers import SnippetSerializers, UserSerializers
 
 # Necessary Packages for DRF Based API Format
 from rest_framework import status
@@ -15,7 +16,11 @@ from django.http import Http404
 from rest_framework.views import APIView
 
 # Necessary Packages for DRF Generic Class Based API Format
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
+# Custom Permission Import
+from pastebin_snippets.permissions import IsOwnerOrReadOnly
 
 
 @csrf_exempt
@@ -132,6 +137,7 @@ class SnippetListWOGeneric(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class SnippetDetailWOGeneric(APIView):
     def get_object(self, pk):
         try:
@@ -162,8 +168,23 @@ class SnippetDetailWOGeneric(APIView):
 class SnippetList(ListCreateAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializers
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class SnippetDetail(RetrieveUpdateDestroyAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializers
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+class UserList(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializers
+
+
+class UserDetail(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializers
