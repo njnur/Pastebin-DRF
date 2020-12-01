@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from pastebin_snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
+from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
 
 class SnippetSerializersBasic(serializers.Serializer):

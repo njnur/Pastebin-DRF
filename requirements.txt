@@ -4,3 +4,5 @@ djangorestframework
 Pygments
 pytz
 sqlparse
+django-environ
+psycopg2-binary
